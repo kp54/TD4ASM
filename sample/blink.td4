@@ -1,0 +1,5 @@
+; 出力が点滅するだけ.
+lp OUT 0b1111
+NOP
+OUT 0b0000
+JMP lp
