@@ -1,4 +1,6 @@
 import re
+import collections
+import enum
 
 
 class Token:
@@ -9,6 +11,15 @@ class Token:
 
     def __str__(self):
         return f'pos={self.pos}, type={self.type}, value={self.value}'
+
+
+class TokenTypeInt(enum.Enum):
+    OPCODE = 0
+    IMMEDIATE = 1
+    IDENTIFIER = 2
+    EOL = 3
+    SKIP = 4
+    COMMENT = 5
 
 
 def tokenize(text):
@@ -41,6 +52,38 @@ def tokenize(text):
             lst = i.end()+1
 
 
+def verify_syntax(tokens):
+    def tdict(params):
+        return collections.defaultdict(
+            lambda: False,
+            ((TokenTypeInt[k], v) for k, v in params.items()))
+
+    exp = (
+        tdict({'OPCODE': 1, 'IDENTIFIER': 3, 'EOL': True}),
+        tdict({'IMMEDIATE': 2, 'IDENTIFIER': 2, 'EOL': True}),
+        tdict({'IMMEDIATE': 2, 'IDENTIFIER': 2, 'EOL': True}),
+        tdict({'OPCODE': 1}),
+    )
+
+    state = 0
+    line = ''
+    lno = 0
+    for i in tokens:
+        if i.type in ('SKIP', 'COMMENT'):
+            continue
+        line += f'({i.type})'
+
+        state = exp[state][TokenTypeInt[i.type]]
+        if state is True:
+            yield f'line {lno}: {line} OK'
+            line = ''
+            lno += 1
+            state = 0
+        if state is False:
+            yield f'line {lno}: {line} ERR'
+            break
+
+
 with open('sample/blink.td4') as fp:
     code = fp.read()
 
@@ -48,4 +91,8 @@ print(code)
 print('-'*80)
 
 for i in tokenize(code):
+    print(i)
+print('-'*80)
+
+for i in verify_syntax(tokenize(code)):
     print(i)
