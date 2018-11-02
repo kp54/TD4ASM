@@ -69,9 +69,11 @@ def verify_syntax(tokens):
     line = ''
     lno = 0
     for i in tokens:
-        if i.type in ('SKIP', 'COMMENT'):
+        if i.type == 'SKIP':
             continue
         line += f'({i.type})'
+        if i.type == 'COMMENT':
+            continue
 
         state = exp[state][TokenTypeInt[i.type]]
         if state is True:
