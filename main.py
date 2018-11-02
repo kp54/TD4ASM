@@ -32,6 +32,9 @@ def tokenize(text):
     for i in re.finditer(proc, text):
         type_ = i.lastgroup
         value = i.group(type_)
+        if type_ == 'MISMATCH':
+            raise Exception(f'E01:({lno},{i.start()-lst}):{value}')
+            break
         yield Token((lno, i.start()-lst), type_, value)
         if type_ == 'EOL':
             lno += 1
