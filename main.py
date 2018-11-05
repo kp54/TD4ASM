@@ -42,7 +42,8 @@ def tokenize(text):
     lst = 0
     for i in re.finditer(proc, text):
         type_ = i.lastgroup
-        value = i.group(type_)
+        if type_ not in ('EOL', 'SKIP'):
+            value = i.group(type_)
         if type_ == 'MISMATCH':
             raise Exception(f'E01:({lno},{i.start()-lst}):{value}')
             break
@@ -86,15 +87,21 @@ def verify_syntax(tokens):
             break
 
 
+def line():
+    import shutil
+    print('-'*shutil.get_terminal_size()[0])
+
+
 with open('sample/blink.td4') as fp:
     code = fp.read()
 
 print(code)
-print('-'*80)
+line()
 
 for i in tokenize(code):
     print(i)
-print('-'*80)
+line()
 
 for i in verify_syntax(tokenize(code)):
     print(i)
+line()
