@@ -82,7 +82,7 @@ def verify_syntax(tokens):
             lno += 1
             state = 0
         if state is False:
-            yield f'line {lno}: {line} ERR'
+            raise Exception(f'line {lno}: {line} ERR')
             break
 
 
