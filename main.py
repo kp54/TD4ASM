@@ -1,6 +1,4 @@
 import re
-import collections
-import enum
 
 
 class Token:
@@ -13,13 +11,9 @@ class Token:
         return f'pos={self.pos}, type={self.type}, value={self.value}'
 
 
-class TokenTypeInt(enum.Enum):
-    OPCODE = 0
-    IMMEDIATE = 1
-    IDENTIFIER = 2
-    EOL = 3
-    SKIP = 4
-    COMMENT = 5
+def fdict(dict_):
+    import collections
+    return collections.defaultdict(lambda: False, dict_)
 
 
 def tokenize(text):
@@ -54,16 +48,11 @@ def tokenize(text):
 
 
 def verify_syntax(tokens):
-    def tdict(params):
-        return collections.defaultdict(
-            lambda: False,
-            ((TokenTypeInt[k], v) for k, v in params.items()))
-
     exp = (
-        tdict({'OPCODE': 1, 'IDENTIFIER': 3, 'EOL': True}),
-        tdict({'IMMEDIATE': 2, 'IDENTIFIER': 2, 'EOL': True}),
-        tdict({'IMMEDIATE': 2, 'IDENTIFIER': 2, 'EOL': True}),
-        tdict({'OPCODE': 1}),
+        fdict({'OPCODE': 1, 'IDENTIFIER': 3, 'EOL': True}),
+        fdict({'IMMEDIATE': 2, 'IDENTIFIER': 2, 'EOL': True}),
+        fdict({'IMMEDIATE': 2, 'IDENTIFIER': 2, 'EOL': True}),
+        fdict({'OPCODE': 1}),
     )
 
     state = 0
@@ -76,7 +65,7 @@ def verify_syntax(tokens):
         if i.type == 'COMMENT':
             continue
 
-        state = exp[state][TokenTypeInt[i.type]]
+        state = exp[state][i.type]
         if state is True:
             yield f'line {lno}: {line} OK'
             line = ''
