@@ -35,13 +35,13 @@ def tokenize(text):
     lno = 0
     lst = 0
     for i in re.finditer(proc, text):
+        col = i.start()-lst
         type_ = i.lastgroup
-        if type_ not in ('EOL', 'SKIP'):
-            value = i.group(type_)
+        value = '' if type_ in ('EOL', 'SKIP') else i.group(type_)
         if type_ == 'MISMATCH':
-            raise Exception(f'E01:({lno},{i.start()-lst}):{value}')
+            raise Exception(f'E01:({lno},{col}):{value}')
             break
-        yield Token((lno, i.start()-lst), type_, value)
+        yield Token((lno, col), type_, value)
         if type_ == 'EOL':
             lno += 1
             lst = i.end()+1
