@@ -76,6 +76,18 @@ def verify_syntax(tokens):
             break
 
 
+def verify_arguments(tokens):
+    tokens_ = [
+        Token(
+            i.pos,
+            i.value if i.type == 'OPCODE' else i.type,
+            '' if i.type == 'OPCODE' else i.value,
+        ) for i in tokens]
+
+    for i in tokens_:
+        yield i
+
+
 def line():
     import shutil
     print('-'*shutil.get_terminal_size()[0])
@@ -92,5 +104,9 @@ for i in tokenize(code):
 line()
 
 for i in verify_syntax(tokenize(code)):
+    print(i)
+line()
+
+for i in verify_arguments(tokenize(code)):
     print(i)
 line()
